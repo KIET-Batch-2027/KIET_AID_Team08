@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>English → Santali (Ol Chiki) Translator</title>
+    <style>
+        /* ---------- Reset & Base ---------- */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+            color: #e0e0e0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* ---------- Header ---------- */
+        header {
+            text-align: center;
+            padding: 2rem 1rem 1rem;
+        }
+        header h1 {
+            font-size: 2rem;
+            background: linear-gradient(90deg, #00c6ff, #0072ff);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        header p {
+            margin-top: .4rem;
+            color: #aaa;
+            font-size: .95rem;
+        }
+
+        /* ---------- Main Container ---------- */
+        .container {
+            width: 90%;
+            max-width: 800px;
+            margin: 1.5rem auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+
+        /* ---------- Cards ---------- */
+        .card {
+            background: rgba(255,255,255,0.06);
+            border: 1px solid rgba(255,255,255,0.1);
+            border-radius: 16px;
+            padding: 1.5rem;
+            backdrop-filter: blur(12px);
+        }
+        .card h2 {
+            font-size: 1.1rem;
+            margin-bottom: 1rem;
+            display: flex;
+            align-items: center;
+            gap: .5rem;
+        }
+        .card h2 .badge {
+            font-size: .7rem;
+            padding: 2px 8px;
+            border-radius: 20px;
+            font-weight: 600;
+        }
+        .badge-en  { background: #0072ff33; color: #6ec1ff; }
+        .badge-sat { background: #ff720033; color: #ffb46e; }
+
+        /* ---------- Mic Button ---------- */
+        .mic-section {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .mic-btn {
+            width: 90px;
+            height: 90px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            background: linear-gradient(135deg, #0072ff, #00c6ff);
+            color: #fff;
+            font-size: 2rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 0 0 rgba(0,114,255,0.5);
+            transition: transform .2s, box-shadow .3s;
+            position: relative;
+        }
+        .mic-btn:hover { transform: scale(1.05); }
+        .mic-btn.recording {
+            background: linear-gradient(135deg, #ff4444, #ff6b6b);
+            box-shadow: 0 0 0 12px rgba(255,68,68,0.18);
+            animation: pulse 1.2s infinite;
+        }
+
+        @keyframes pulse {
+            0%   { box-shadow: 0 0 0 0  rgba(255,68,68,0.4); }
+            70%  { box-shadow: 0 0 0 18px rgba(255,68,68,0); }
+            100% { box-shadow: 0 0 0 0  rgba(255,68,68,0); }
+        }
+
+        .mic-label {
+            font-size: .85rem;
+            color: #aaa;
+        }
+
+        /* ---------- Text Areas ---------- */
+        .text-box {
+            width: 100%;
+            min-height: 80px;
+            background: rgba(0,0,0,0.25);
+            border: 1px solid rgba(255,255,255,0.08);
+            border-radius: 10px;
+            padding: 1rem;
+            color: #e0e0e0;
+            font-size: 1.05rem;
+            line-height: 1.6;
+            resize: vertical;
+            font-family: inherit;
+        }
+        .text-box:focus {
+            outline: none;
+            border-color: #0072ff88;
+        }
+        .text-box::placeholder { color: #666; }
+
+        /* Santali output — larger for Ol Chiki glyphs */
+        .santali-output {
+            font-size: 1.35rem;
+            min-height: 100px;
+            letter-spacing: .5px;
+            color: #ffcc70;
+            background: rgba(255,204,112,0.04);
+            border-color: rgba(255,204,112,0.15);
+        }
+
+        /* ---------- Type-and-Translate ---------- */
+        .input-row {
+            display: flex;
+            gap: .75rem;
+        }
+        .input-row textarea {
+            flex: 1;
+        }
+        .translate-btn {
+            padding: .6rem 1.4rem;
+            border: none;
+            border-radius: 10px;
+            background: linear-gradient(135deg, #0072ff, #00c6ff);
+            color: #fff;
+            font-size: .95rem;
+            cursor: pointer;
+            white-space: nowrap;
+            align-self: flex-end;
+            transition: opacity .2s;
+        }
+        .translate-btn:disabled { opacity: .4; cursor: not-allowed; }
+        .translate-btn:hover:not(:disabled) { opacity: .85; }
+
+        /* ---------- Status / Loader ---------- */
+        .status {
+            text-align: center;
+            font-size: .85rem;
+            color: #aaa;
+            min-height: 1.2rem;
+        }
+        .status.error { color: #ff6b6b; }
+
+        .loader {
+            display: inline-block;
+            width: 18px; height: 18px;
+            border: 2px solid #555;
+            border-top-color: #00c6ff;
+            border-radius: 50%;
+            animation: spin .7s linear infinite;
+            vertical-align: middle;
+            margin-right: .4rem;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* ---------- History ---------- */
+        .history-title {
+            font-size: .95rem;
+            color: #888;
+            margin-bottom: .75rem;
+        }
+        .history-item {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 10px;
+            padding: .8rem 1rem;
+            margin-bottom: .6rem;
+        }
+        .history-item .hi-en {
+            font-size: .9rem;
+            color: #99bbff;
+            margin-bottom: .3rem;
+        }
+        .history-item .hi-sat {
+            font-size: 1.1rem;
+            color: #ffcc70;
+        }
+
+        /* ---------- Footer ---------- */
+        footer {
+            text-align: center;
+            padding: 2rem 1rem;
+            color: #555;
+            font-size: .8rem;
+        }
+
+        /* ---------- Responsive ---------- */
+        @media (max-width: 500px) {
+            header h1 { font-size: 1.4rem; }
+            .input-row { flex-direction: column; }
+            .translate-btn { align-self: stretch; }
+        }
+    </style>
+</head>
+<body>
+
+<header>
+    <h1>🎙️ English → Santali Translator</h1>
+    <p>Speak or type English — get Santali in <strong>Ol Chiki (ᱚᱞ ᱪᱤᱠᱤ)</strong> script</p>
+</header>
+
+<div class="container">
+
+    <!-- ============ MIC SECTION ============ -->
+    <div class="card mic-section">
+        <button class="mic-btn" id="micBtn" title="Click to record">
+            🎤
+        </button>
+        <span class="mic-label" id="micLabel">Tap to speak</span>
+    </div>
+
+    <!-- ============ OR TYPE ============ -->
+    <div class="card">
+        <h2>⌨️ Or type English text</h2>
+        <div class="input-row">
+            <textarea class="text-box" id="typedInput" rows="2"
+                      placeholder="Type English here…"></textarea>
+            <button class="translate-btn" id="translateBtn">Translate</button>
+        </div>
+    </div>
+
+    <!-- ============ STATUS ============ -->
+    <div class="status" id="status"></div>
+
+    <!-- ============ ENGLISH OUTPUT ============ -->
+    <div class="card">
+        <h2><span class="badge badge-en">EN</span> English (recognised)</h2>
+        <div class="text-box" id="englishOutput" style="cursor:default;"
+             >Your English speech will appear here</div>
+    </div>
+
+    <!-- ============ SANTALI OUTPUT ============ -->
+    <div class="card">
+        <h2><span class="badge badge-sat">ᱥᱟ</span> Santali (Ol Chiki)</h2>
+        <div class="text-box santali-output" id="santaliOutput" style="cursor:default;"
+             >ᱥᱟᱱᱛᱟᱲᱤ ᱛᱟᱨᱡᱚᱢᱟ ᱱᱚᱸᱫᱮ ᱦᱤᱡᱩᱜ ᱠᱟᱱᱟ</div>
+    </div>
+
+    <!-- ============ HISTORY ============ -->
+    <div class="card" id="historyCard" style="display:none;">
+        <div class="history-title">📜 Translation History</div>
+        <div id="historyList"></div>
+    </div>
+
+</div>
+
+<footer>
+    English → Santali (Ol Chiki) Translator &bull; Powered by Whisper &amp; Google Translate
+</footer>
+
+<!-- ======================= JAVASCRIPT ======================= -->
+<script>
+const micBtn       = document.getElementById('micBtn');
+const micLabel     = document.getElementById('micLabel');
+const statusEl     = document.getElementById('status');
+const englishOut   = document.getElementById('englishOutput');
+const santaliOut   = document.getElementById('santaliOutput');
+const typedInput   = document.getElementById('typedInput');
+const translateBtn = document.getElementById('translateBtn');
+const historyCard  = document.getElementById('historyCard');
+const historyList  = document.getElementById('historyList');
+
+let mediaRecorder = null;
+let audioChunks   = [];
+let isRecording   = false;
+
+// -------- Pick a MIME type the browser actually supports --------
+function getSupportedMimeType() {
+    const types = [
+        'audio/webm;codecs=opus',
+        'audio/webm',
+        'audio/ogg;codecs=opus',
+        'audio/ogg',
+        'audio/mp4',
+        'audio/wav',
+        ''   // empty = browser default
+    ];
+    for (const t of types) {
+        if (t === '' || MediaRecorder.isTypeSupported(t)) {
+            console.log('Using MIME type:', t || '(browser default)');
+            return t;
+        }
+    }
+    return '';
+}
+
+// -------- Status helpers --------
+function setStatus(msg, isError = false) {
+    statusEl.className = 'status' + (isError ? ' error' : '');
+    statusEl.innerHTML = msg;
+}
+function setLoading(msg) {
+    setStatus(`<span class="loader"></span>${msg}`);
+}
+
+// -------- History --------
+function addHistory(en, sat) {
+    historyCard.style.display = 'block';
+    const div = document.createElement('div');
+    div.className = 'history-item';
+    div.innerHTML = `<div class="hi-en">EN: ${en}</div><div class="hi-sat">ᱥᱟ: ${sat}</div>`;
+    historyList.prepend(div);
+}
+
+// ===================================================
+//  MIC RECORDING  (sends audio blob to /transcribe)
+// ===================================================
+micBtn.addEventListener('click', async () => {
+    if (isRecording) {
+        stopRecording();
+        return;
+    }
+    try {
+        const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+
+        const mimeType = getSupportedMimeType();
+        const options  = mimeType ? { mimeType } : {};
+        mediaRecorder  = new MediaRecorder(stream, options);
+        audioChunks    = [];
+
+        console.log('MediaRecorder created, state:', mediaRecorder.state,
+                     'mimeType:', mediaRecorder.mimeType);
+
+        mediaRecorder.ondataavailable = e => {
+            console.log('Chunk received, size:', e.data.size);
+            if (e.data.size > 0) audioChunks.push(e.data);
+        };
+
+        mediaRecorder.onstop = async () => {
+            console.log('Recording stopped, chunks:', audioChunks.length);
+            stream.getTracks().forEach(t => t.stop());
+
+            if (audioChunks.length === 0) {
+                setStatus('No audio data captured. Please try again.', true);
+                return;
+            }
+
+            const blob = new Blob(audioChunks, { type: mediaRecorder.mimeType || 'audio/webm' });
+            console.log('Audio blob size:', blob.size, 'type:', blob.type);
+
+            if (blob.size < 100) {
+                setStatus('Recording too short. Please speak for at least 1 second.', true);
+                return;
+            }
+
+            await sendAudio(blob);
+        };
+
+        mediaRecorder.onerror = (e) => {
+            console.error('MediaRecorder error:', e);
+            setStatus('Recording error: ' + (e.error?.message || 'unknown'), true);
+            stopRecording();
+        };
+
+        // Use timeslice=1000ms so data is captured in chunks (prevents empty blob)
+        mediaRecorder.start(1000);
+        isRecording = true;
+        micBtn.classList.add('recording');
+        micBtn.textContent = '⏹️';
+        micLabel.textContent = 'Recording… tap to stop';
+        setStatus('🔴 Listening…');
+    } catch (err) {
+        console.error('getUserMedia error:', err);
+        setStatus('Microphone access denied. Please allow mic permission.', true);
+    }
+});
+
+function stopRecording() {
+    if (mediaRecorder && mediaRecorder.state !== 'inactive') {
+        mediaRecorder.stop();
+    }
+    isRecording = false;
+    micBtn.classList.remove('recording');
+    micBtn.textContent = '🎤';
+    micLabel.textContent = 'Tap to speak';
+}
+
+async function sendAudio(blob) {
+    setLoading('Transcribing & translating… (may take 10-20 sec on first use)');
+    const form = new FormData();
+
+    // Determine file extension from MIME type
+    const ext = blob.type.includes('ogg') ? '.ogg'
+              : blob.type.includes('mp4') ? '.mp4'
+              : blob.type.includes('wav') ? '.wav'
+              : '.webm';
+    form.append('audio', blob, 'recording' + ext);
+
+    try {
+        console.log('Sending audio to /transcribe ...');
+        const res  = await fetch('/transcribe', { method: 'POST', body: form });
+        console.log('Response status:', res.status);
+
+        const data = await res.json();
+        console.log('Response data:', data);
+
+        if (data.error) {
+            setStatus(data.error, true);
+            return;
+        }
+        englishOut.textContent = data.english;
+        santaliOut.textContent = data.santali;
+        addHistory(data.english, data.santali);
+        setStatus('✅ Done!');
+    } catch (err) {
+        console.error('Fetch error:', err);
+        setStatus('Network error: ' + err.message + '. Check if the server is running on port 5000.', true);
+    }
+}
+
+// ===================================================
+//  TEXT TRANSLATION  (sends typed text to /translate)
+// ===================================================
+translateBtn.addEventListener('click', translateTyped);
+typedInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); translateTyped(); }
+});
+
+async function translateTyped() {
+    const text = typedInput.value.trim();
+    if (!text) return;
+    translateBtn.disabled = true;
+    setLoading('Translating…');
+
+    try {
+        const res  = await fetch('/translate', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ text })
+        });
+        const data = await res.json();
+        if (data.error) {
+            setStatus(data.error, true);
+            translateBtn.disabled = false;
+            return;
+        }
+        englishOut.textContent = data.english;
+        santaliOut.textContent = data.santali;
+        addHistory(data.english, data.santali);
+        setStatus('✅ Done!');
+    } catch (err) {
+        setStatus('Network error: ' + err.message, true);
+    }
+    translateBtn.disabled = false;
+}
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+flask
+openai-whisper
+deep-translator
+torch
+ffmpeg-python
