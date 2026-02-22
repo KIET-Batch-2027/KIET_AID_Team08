@@ -20,19 +20,59 @@
 
         /* ---------- Header ---------- */
         header {
-            text-align: center;
-            padding: 2rem 1rem 1rem;
+            width: 100%;
+            padding: 1.5rem 2rem 1rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
         }
-        header h1 {
+        .header-center {
+            text-align: center;
+        }
+        .header-center h1 {
             font-size: 2rem;
             background: linear-gradient(90deg, #00c6ff, #0072ff);
+            background-clip: text;
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        header p {
+        .header-center p {
             margin-top: .4rem;
             color: #aaa;
             font-size: .95rem;
+        }
+        .history-toggle-btn {
+            position: absolute;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.15);
+            color: #ccc;
+            padding: .55rem 1.1rem;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: .88rem;
+            display: flex;
+            align-items: center;
+            gap: .4rem;
+            transition: background .2s, color .2s;
+            backdrop-filter: blur(8px);
+        }
+        .history-toggle-btn:hover {
+            background: rgba(255,255,255,0.15);
+            color: #fff;
+        }
+        .history-toggle-btn .badge-count {
+            background: #0072ff;
+            color: #fff;
+            font-size: .65rem;
+            padding: 1px 6px;
+            border-radius: 10px;
+            font-weight: 700;
+            min-width: 18px;
+            text-align: center;
         }
 
         /* ---------- Main Container ---------- */
@@ -185,27 +225,129 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
 
-        /* ---------- History ---------- */
-        .history-title {
-            font-size: .95rem;
-            color: #888;
-            margin-bottom: .75rem;
+        /* ---------- History Slide Panel ---------- */
+        .panel-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 900;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .3s;
         }
+        .panel-overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        .history-panel {
+            position: fixed;
+            top: 0; right: 0;
+            width: 380px;
+            max-width: 92vw;
+            height: 100vh;
+            background: linear-gradient(180deg, #1a1740, #191430);
+            border-left: 1px solid rgba(255,255,255,0.1);
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+            transform: translateX(100%);
+            transition: transform .35s cubic-bezier(.4,0,.2,1);
+            box-shadow: -4px 0 30px rgba(0,0,0,0.5);
+        }
+        .history-panel.open {
+            transform: translateX(0);
+        }
+
+        .panel-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 1.2rem 1.4rem;
+            border-bottom: 1px solid rgba(255,255,255,0.08);
+        }
+        .panel-header h2 {
+            font-size: 1.1rem;
+            color: #e0e0e0;
+            display: flex;
+            align-items: center;
+            gap: .45rem;
+        }
+        .panel-close-btn {
+            background: none;
+            border: none;
+            color: #888;
+            font-size: 1.4rem;
+            cursor: pointer;
+            padding: .2rem .5rem;
+            border-radius: 6px;
+            transition: color .2s, background .2s;
+        }
+        .panel-close-btn:hover {
+            color: #ff6b6b;
+            background: rgba(255,107,107,0.1);
+        }
+
+        .panel-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 1rem 1.2rem;
+        }
+        .panel-body::-webkit-scrollbar { width: 5px; }
+        .panel-body::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.1); border-radius: 3px; }
+
+        .panel-empty {
+            text-align: center;
+            color: #555;
+            margin-top: 3rem;
+            font-size: .95rem;
+        }
+
         .history-item {
-            background: rgba(255,255,255,0.03);
-            border: 1px solid rgba(255,255,255,0.06);
-            border-radius: 10px;
-            padding: .8rem 1rem;
-            margin-bottom: .6rem;
+            background: rgba(255,255,255,0.04);
+            border: 1px solid rgba(255,255,255,0.07);
+            border-radius: 12px;
+            padding: .9rem 1rem;
+            margin-bottom: .7rem;
+            transition: background .2s;
+        }
+        .history-item:hover {
+            background: rgba(255,255,255,0.07);
+        }
+        .history-item .hi-time {
+            font-size: .7rem;
+            color: #555;
+            margin-bottom: .35rem;
         }
         .history-item .hi-en {
             font-size: .9rem;
             color: #99bbff;
             margin-bottom: .3rem;
+            word-break: break-word;
         }
         .history-item .hi-sat {
             font-size: 1.1rem;
             color: #ffcc70;
+            word-break: break-word;
+        }
+
+        .panel-footer {
+            padding: .8rem 1.2rem;
+            border-top: 1px solid rgba(255,255,255,0.08);
+        }
+        .clear-history-btn {
+            width: 100%;
+            padding: .6rem;
+            border: 1px solid rgba(255,68,68,0.3);
+            border-radius: 10px;
+            background: rgba(255,68,68,0.08);
+            color: #ff6b6b;
+            font-size: .85rem;
+            cursor: pointer;
+            transition: background .2s;
+        }
+        .clear-history-btn:hover {
+            background: rgba(255,68,68,0.18);
         }
 
         /* ---------- Footer ---------- */
@@ -218,7 +360,14 @@
 
         /* ---------- Responsive ---------- */
         @media (max-width: 500px) {
-            header h1 { font-size: 1.4rem; }
+            .header-center h1 { font-size: 1.4rem; }
+            header { padding: 1.2rem 1rem .8rem; }
+            .history-toggle-btn {
+                right: .8rem;
+                padding: .45rem .75rem;
+                font-size: .8rem;
+            }
+            .history-panel { width: 100vw; max-width: 100vw; }
             .input-row { flex-direction: column; }
             .translate-btn { align-self: stretch; }
         }
@@ -227,9 +376,27 @@
 <body>
 
 <header>
-    <h1>🎙️ English → Santali Translator</h1>
-    <p>Speak or type English — get Santali in <strong>Ol Chiki (ᱚᱞ ᱪᱤᱠᱤ)</strong> script</p>
+    <div class="header-center">
+        <h1>🎙️ English → Santali Translator</h1>
+        <p>Speak or type English — get Santali in <strong>Ol Chiki (ᱚᱞ ᱪᱤᱠᱤ)</strong> script</p>
+    </div>
+    <button class="history-toggle-btn" id="historyToggleBtn" title="Translation History">
+        📜 History <span class="badge-count" id="historyBadge">0</span>
+    </button>
 </header>
+
+<!-- ============ HISTORY SLIDE PANEL ============ -->
+<div class="panel-overlay" id="panelOverlay"></div>
+<div class="history-panel" id="historyPanel">
+    <div class="panel-header">
+        <h2>📜 Translation History</h2>
+        <button class="panel-close-btn" id="panelCloseBtn" title="Close">✕</button>
+    </div>
+    <div class="panel-body" id="historyList"></div>
+    <div class="panel-footer">
+        <button class="clear-history-btn" id="clearHistoryBtn">🗑️ Clear All History</button>
+    </div>
+</div>
 
 <div class="container">
 
@@ -268,12 +435,6 @@
              >ᱥᱟᱱᱛᱟᱲᱤ ᱛᱟᱨᱡᱚᱢᱟ ᱱᱚᱸᱫᱮ ᱦᱤᱡᱩᱜ ᱠᱟᱱᱟ</div>
     </div>
 
-    <!-- ============ HISTORY ============ -->
-    <div class="card" id="historyCard" style="display:none;">
-        <div class="history-title">📜 Translation History</div>
-        <div id="historyList"></div>
-    </div>
-
 </div>
 
 <footer>
@@ -282,15 +443,22 @@
 
 <!-- ======================= JAVASCRIPT ======================= -->
 <script>
-const micBtn       = document.getElementById('micBtn');
-const micLabel     = document.getElementById('micLabel');
-const statusEl     = document.getElementById('status');
-const englishOut   = document.getElementById('englishOutput');
-const santaliOut   = document.getElementById('santaliOutput');
-const typedInput   = document.getElementById('typedInput');
-const translateBtn = document.getElementById('translateBtn');
-const historyCard  = document.getElementById('historyCard');
-const historyList  = document.getElementById('historyList');
+const micBtn          = document.getElementById('micBtn');
+const micLabel        = document.getElementById('micLabel');
+const statusEl        = document.getElementById('status');
+const englishOut      = document.getElementById('englishOutput');
+const santaliOut      = document.getElementById('santaliOutput');
+const typedInput      = document.getElementById('typedInput');
+const translateBtn    = document.getElementById('translateBtn');
+const historyList     = document.getElementById('historyList');
+const historyPanel    = document.getElementById('historyPanel');
+const panelOverlay    = document.getElementById('panelOverlay');
+const historyToggle   = document.getElementById('historyToggleBtn');
+const panelCloseBtn   = document.getElementById('panelCloseBtn');
+const clearHistoryBtn = document.getElementById('clearHistoryBtn');
+const historyBadge    = document.getElementById('historyBadge');
+
+const HISTORY_KEY = 'santali_translation_history';
 
 let mediaRecorder = null;
 let audioChunks   = [];
@@ -325,14 +493,67 @@ function setLoading(msg) {
     setStatus(`<span class="loader"></span>${msg}`);
 }
 
-// -------- History --------
-function addHistory(en, sat) {
-    historyCard.style.display = 'block';
-    const div = document.createElement('div');
-    div.className = 'history-item';
-    div.innerHTML = `<div class="hi-en">EN: ${en}</div><div class="hi-sat">ᱥᱟ: ${sat}</div>`;
-    historyList.prepend(div);
+// ========== HISTORY (localStorage) ==========
+function getHistory() {
+    try {
+        return JSON.parse(localStorage.getItem(HISTORY_KEY)) || [];
+    } catch { return []; }
 }
+
+function saveHistory(arr) {
+    localStorage.setItem(HISTORY_KEY, JSON.stringify(arr));
+    updateBadge(arr.length);
+}
+
+function addHistory(en, sat) {
+    const history = getHistory();
+    history.unshift({ en, sat, time: new Date().toLocaleString() });
+    // Keep last 100 entries max
+    if (history.length > 100) history.length = 100;
+    saveHistory(history);
+    renderHistory();
+}
+
+function renderHistory() {
+    const history = getHistory();
+    updateBadge(history.length);
+
+    if (history.length === 0) {
+        historyList.innerHTML = '<div class="panel-empty">No translations yet.<br>Start speaking or typing!</div>';
+        return;
+    }
+    historyList.innerHTML = history.map(h =>
+        `<div class="history-item">
+            <div class="hi-time">${h.time || ''}</div>
+            <div class="hi-en">EN: ${h.en}</div>
+            <div class="hi-sat">ᱥᱟ: ${h.sat}</div>
+        </div>`
+    ).join('');
+}
+
+function updateBadge(count) {
+    historyBadge.textContent = count;
+    historyBadge.style.display = count > 0 ? 'inline-block' : 'none';
+}
+
+function openPanel()  { historyPanel.classList.add('open');  panelOverlay.classList.add('open');  renderHistory(); }
+function closePanel() { historyPanel.classList.remove('open'); panelOverlay.classList.remove('open'); }
+
+// Panel event listeners
+historyToggle.addEventListener('click', openPanel);
+panelCloseBtn.addEventListener('click', closePanel);
+panelOverlay.addEventListener('click', closePanel);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closePanel(); });
+
+clearHistoryBtn.addEventListener('click', () => {
+    if (confirm('Clear all translation history?')) {
+        localStorage.removeItem(HISTORY_KEY);
+        renderHistory();
+    }
+});
+
+// Load history badge count on page load
+renderHistory();
 
 // ===================================================
 //  MIC RECORDING  (sends audio blob to /transcribe)
